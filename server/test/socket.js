@@ -1,7 +1,8 @@
-import { createServer } from "node:http";
 import { io as ioc } from "socket.io-client";
-import { Server } from "socket.io";
 import { assert } from "chai";
+import dotenv from "dotenv";
+dotenv.config();
+const port = process.env.PORT || 3000;
 
 function waitFor(socket, event) {
   return new Promise((resolve) => {
@@ -9,56 +10,57 @@ function waitFor(socket, event) {
   });
 }
 
-describe("my awesome project", () => {
-  let io, serverSocket, clientSocket;
+describe("Socket connection test", () => {
+  let clientSocket;
 
   before((done) => {
-    const httpServer = createServer();
-    io = new Server(httpServer);
-    httpServer.listen(() => {
-      const port = httpServer.address().port;
-      clientSocket = ioc(`http://localhost:${port}`);
-      io.on("connection", (socket) => {
-        serverSocket = socket;
-      });
-      clientSocket.on("connect", done);
+    clientSocket = ioc(`http://localhost:${port}`);
+
+    clientSocket.on("connect", done);
+  });
+
+  it("should receive 'hello' when emitting 'hi'", (done) => {
+    clientSocket.once("hello", () => {
+      assert.isTrue(true);
+      done();
     });
+
+    clientSocket.emit("hi");
   });
 
   after(() => {
-    io.close();
     clientSocket.disconnect();
   });
 
-  it("should work", (done) => {
-    clientSocket.on("hello", (arg) => {
-      assert.equal(arg, "world");
-      done();
-    });
-    serverSocket.emit("hello", "world");
-  });
+  // it("should work", (done) => {
+  //   clientSocket.on("hello", (arg) => {
+  //     assert.equal(arg, "world");
+  //     done();
+  //   });
+  //   serverSocket.emit("hello", "world");
+  // });
 
-  it("should work with an acknowledgement", (done) => {
-    serverSocket.on("hi", (cb) => {
-      cb("hola");
-    });
-    clientSocket.emit("hi", (arg) => {
-      assert.equal(arg, "hola");
-      done();
-    });
-  });
+  // it("should work with an acknowledgement", (done) => {
+  //   serverSocket.on("hi", (cb) => {
+  //     cb("hola");
+  //   });
+  //   clientSocket.emit("hi", (arg) => {
+  //     assert.equal(arg, "hola");
+  //     done();
+  //   });
+  // });
 
-  it("should work with emitWithAck()", async () => {
-    serverSocket.on("foo", (cb) => {
-      cb("bar");
-    });
-    const result = await clientSocket.emitWithAck("foo");
-    assert.equal(result, "bar");
-  });
+  // it("should work with emitWithAck()", async () => {
+  //   serverSocket.on("foo", (cb) => {
+  //     cb("bar");
+  //   });
+  //   const result = await clientSocket.emitWithAck("foo");
+  //   assert.equal(result, "bar");
+  // });
 
-  it("should work with waitFor()", () => {
-    clientSocket.emit("baz");
+  // it("should work with waitFor()", () => {
+  //   clientSocket.emit("baz");
 
-    return waitFor(serverSocket, "baz");
-  });
+  //   return waitFor(serverSocket, "baz");
+  // });
 });
