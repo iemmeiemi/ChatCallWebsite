@@ -5,6 +5,8 @@ import { createBrowserRouter } from "react-router-dom";
 export const router = createBrowserRouter([
   {
     path: "/",
+    Component: (await import("../App")).Component,
+    // errorElement: ,
     children: [
       {
         index: true,
@@ -17,5 +19,18 @@ export const router = createBrowserRouter([
       },
       {},
     ],
+  },
+  // {
+  //   path: "login",
+  //   lazy: async () => ({
+  //     Component: (await import("../pages/Auth/login.component.jsx")).Component,
+  //   }),
+  // },
+  {
+    path: "register",
+    lazy: async () => ({
+      Component: (await import("../pages/Auth/register.component.jsx"))
+        .Component,
+    }),
   },
 ]);

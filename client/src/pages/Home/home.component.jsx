@@ -9,6 +9,7 @@ export const Component = () => {
   return (
     <div>
       <p>{data.message}</p>
+      
       <Form method="post" navigate={false}>
         <input type="text" name="title" />
         <button type="submit">Create Todo</button>
